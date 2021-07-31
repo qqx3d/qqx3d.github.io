@@ -1,11 +1,15 @@
 [package]
 name = "qqx"
 version = "0.0.0"
-authors = ["Roman <romann.tarasenko@gmail.com>"]
+authors = ["Roman <qqx.3d.rs@gmail.com>"]
 edition = "2018"
 license = "GPL-3.0"
 description = "qqx is a 3d library for rust based on vulcan without any game engines"
-repository = "https://github.com/Roman-Tarasenko-27/qqx"
+repository = "https://github.com/qqx3d/qqx3d.github.io"
 readme = "README.md"
+homepage = "https://qqx3d.github.io"
+documentation = "https://docs.rs/qqx"
+keywords = ["graphic", "graphics", "game"]
+categories = ["game-development", "games", "gui", "graphics"]
 
 [dependencies]
