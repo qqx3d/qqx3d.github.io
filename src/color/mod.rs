@@ -1,6 +1,10 @@
 use core::convert::From;
+use vulkano::format::ClearValue;
 use crate::{Vec3, Vec4};
 
+///
+/// Represents RGBA Color
+///
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Color {
     pub r: u8,
@@ -75,11 +79,23 @@ impl From <Color> for Vec3 <f32> {
     }
 }
 
+impl From <Color> for Vec <ClearValue> {
+    fn from(x: Color) -> Self {
+        vec![<[f32; 4]>::from(Vec4::from(x)).into()]
+    }
+}
+
 impl Color {
+    ///
+    /// Constructs Color from RGBA values
+    ///
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
     }
 
+    ///
+    /// Constructs Color from RGB values(with Alpha = MAX)
+    ///
     pub const fn rgb(r: u8, g: u8, b: u8) -> Self {
         Self::rgba(r, g, b, u8::MAX)
     }

@@ -1,7 +1,10 @@
-pub(crate) mod impls;
+mod impls;
 
 /// Struct represents hints to initializer about program
 pub struct Hint;
+
+// TODO: pub(crate)
+pub struct Stt;
 
 impl Default for Hint {
     fn default() -> Self {

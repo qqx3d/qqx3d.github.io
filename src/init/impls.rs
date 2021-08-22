@@ -1,4 +1,4 @@
-use super::Hint;
+use super::{Hint, Stt};
 use std::sync::Arc;
 use core::mem::MaybeUninit;
 use vulkano::{
@@ -14,24 +14,30 @@ static mut EVENTLOOP: MaybeUninit <EventLoop> = MaybeUninit::uninit();
 static mut DEVICE: MaybeUninit <Arc <Device>> = MaybeUninit::uninit();
 static mut QUEUE: MaybeUninit <Arc <Queue>> = MaybeUninit::uninit();
 
-pub(crate) fn instance() -> &'static mut Arc <Instance> {
+impl super::Stt {
+    #[inline(always)]
+    pub fn instance() -> &'static mut Arc <Instance> {
     unsafe { INSTANCE.assume_init_mut() }
 }
 
-pub(crate) fn physical() -> PhysicalDevice <'static> {
-    unsafe { PhysicalDevice::from_index(instance(), PHYSICAL).unwrap() }
-}
+    pub fn physical() -> PhysicalDevice <'static> {
+        unsafe { PhysicalDevice::from_index(Self::instance(), PHYSICAL).unwrap() }
+    }
 
-pub(crate) fn eventloop() -> &'static mut EventLoop {
+    #[inline(always)]
+    pub fn eventloop() -> &'static mut EventLoop {
     unsafe { EVENTLOOP.assume_init_mut() }
 }
 
-pub(crate) fn device() -> &'static mut Arc <Device> {
+    #[inline(always)]
+    pub fn device() -> &'static mut Arc <Device> {
     unsafe { DEVICE.assume_init_mut() }
 }
 
-pub(crate) fn queue() -> &'static mut Arc <Queue> {
+    #[inline(always)]
+    pub fn queue() -> &'static mut Arc <Queue> {
     unsafe { QUEUE.assume_init_mut() }
+}
 }
 
 pub unsafe fn initialize(_hint: Hint) {
@@ -41,7 +47,7 @@ pub unsafe fn initialize(_hint: Hint) {
 
     PHYSICAL = 0;
 
-    let queue_family = physical()
+    let queue_family = Stt::physical()
         .queue_families()
         .find(|&q| q.supports_graphics())
         .unwrap();
@@ -52,8 +58,8 @@ pub unsafe fn initialize(_hint: Hint) {
     };
 
     let (device, mut queues) = Device::new(
-        physical(),
-        physical().supported_features(),
+        Stt::physical(),
+        Stt::physical().supported_features(),
         &device_ext,
         [(queue_family, 0.5)].iter().cloned()
     ).unwrap();
