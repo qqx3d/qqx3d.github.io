@@ -1,25 +1,21 @@
-use crate::Window;
-use glium::{
-    Vertex,
-    VertexBuffer,
-    Display,
-    Program,
-    Surface,
-    index::{NoIndices, IndicesSource, PrimitiveType}
-};
+mod bound;
 
-pub trait OnBoundPolygonInit: Vertex {
-    fn program(dpy: &Display) -> &'static Program;
-}
+use crate::Window;
+use bound::BoundPolygon;
+use glium::index::{NoIndices, PrimitiveType};
+use core::marker::PhantomData;
+
+pub use bound::{BoundPolygonInterface, BoundPolygonInterfaceAction};
 
 #[derive(Clone)]
-pub struct Polygon <V> where V: OnBoundPolygonInit {
-    vxs: Vec <V>
+pub struct Polygon <V, U> where V: BoundPolygonInterface <U>, U: Default {
+    vxs: Vec <V>,
+    _marker: PhantomData <U>
 }
 
-impl <V> Polygon <V> where V: OnBoundPolygonInit {
+impl <V, U> Polygon <V, U> where V: BoundPolygonInterface <U>, U: Default {
     pub const fn new() -> Self {
-        Self { vxs: Vec::new() }
+        Self { vxs: Vec::new(), _marker: PhantomData }
     }
 
     #[inline]
@@ -28,29 +24,7 @@ impl <V> Polygon <V> where V: OnBoundPolygonInit {
         self
     }
 
-    pub fn bind <'a> (self, window: Window) -> BoundPolygon <'a, V> {
+    pub fn bind <'a> (self, window: Window) -> BoundPolygon <'a, V, U, { V::MOVABLE }, { V::COLORABLE }> {
         BoundPolygon::new(self.vxs, window.dpy(), NoIndices(PrimitiveType::TrianglesList))
-    }
-}
-
-pub struct BoundPolygon <'a, V> where V: OnBoundPolygonInit {
-    pub(crate) buf: VertexBuffer <V>,
-    pub(crate) program: &'static Program,
-    pub(crate) indices: IndicesSource <'a>,
-}
-
-impl <'a, V> BoundPolygon <'a, V> where V: OnBoundPolygonInit {
-    pub(crate) fn new <I> (vxs: Vec <V>, dpy: &Display, idx: I) -> Self where I: Into <IndicesSource <'a>> {
-        Self {
-            buf: VertexBuffer::new(dpy, &vxs).unwrap(),
-            program: V::program(dpy),
-            indices: idx.into()
-        }
-    }
-}
-
-impl <'a, V> crate::Drawable for BoundPolygon <'a, V> where V: OnBoundPolygonInit {
-    fn draw(&self, target: &mut glium::Frame) {
-        target.draw(&self.buf, self.indices.clone(), self.program, &glium::uniform!(), &Default::default()).unwrap()
     }
 }

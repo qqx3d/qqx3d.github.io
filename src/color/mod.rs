@@ -1,6 +1,9 @@
 use core::convert::From;
 use crate::{Vec3, Vec4};
-use glium::vertex::{Attribute, AttributeType};
+use glium::{
+    vertex::{Attribute, AttributeType},
+    uniforms::{AsUniformValue, UniformValue}
+};
 
 ///
 /// Represents RGBA Color
@@ -21,6 +24,12 @@ impl Default for Color {
 unsafe impl Attribute for Color {
     fn get_type() -> AttributeType {
         AttributeType::U8U8U8U8
+    }
+}
+
+impl AsUniformValue for Color {
+    fn as_uniform_value(&self) -> UniformValue <'_> {
+        UniformValue::Vec4(Vec4::from(*self).into())
     }
 }
 
@@ -112,11 +121,11 @@ impl Color {
 }
 
 impl Color {
-    const fn cv(x: f32) -> u8 {
+    pub(crate) const fn cv(x: f32) -> u8 {
         (x * (u8::MAX as f32)) as u8
     }
 
-    const fn vc(x: u8) -> f32 {
+    pub(crate) const fn vc(x: u8) -> f32 {
         (x as f32) / (u8::MAX as f32)
     }
 }

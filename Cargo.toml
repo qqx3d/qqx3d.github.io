@@ -1,6 +1,6 @@
 [package]
 name = "qqx"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Roman <qqx.3d.rs@gmail.com>"]
 edition = "2018"
 license = "GPL-3.0"
@@ -16,4 +16,4 @@ exclude = ["src/main.rs", "index.html", ".gitignore", "examples"]
 [dependencies]
 glium = "0.30.1"
 ctor = "0.1.20"
-qqx-macro = "0.0.2"
+qqx-macro = "0.0.3"

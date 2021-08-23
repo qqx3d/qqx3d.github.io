@@ -1,3 +1,3 @@
 pub trait Drawable {
-    fn draw(&self, target: &mut glium::Frame);
+    fn draw(&self, dpy: &glium::Display, target: &mut glium::Frame);
 }

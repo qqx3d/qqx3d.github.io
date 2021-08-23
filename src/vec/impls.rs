@@ -5,7 +5,7 @@ use glium::{
 use core::convert::From;
 
 macro_rules! vec {
-    ($($ty:ident : $size:literal : $($elem:ident $count:literal)* : $i8:ident : $u8:ident : $i16:ident : $u16:ident : $i32:ident : $u32:ident : $i64:ident : $u64:ident : $f32:ident : $f64:ident,)*) => {$(
+    ($($ty:ident : $uniform:ident : $size:literal : $($elem:ident $count:literal)* : $i8:ident : $u8:ident : $i16:ident : $u16:ident : $i32:ident : $u32:ident : $i64:ident : $u64:ident : $f32:ident : $f64:ident,)*) => {$(
         #[derive(Debug)]
         pub struct $ty <T> {
             $(pub $elem : T,)*
@@ -48,6 +48,12 @@ macro_rules! vec {
         impl <T> From <$ty <T>> for [T; $size] where T: Copy {
             fn from(x: $ty <T>) -> Self {
                 [$(x.$elem,)*]
+            }
+        }
+
+        impl glium::uniforms::AsUniformValue for $ty <f32> {
+            fn as_uniform_value(&self) -> glium::uniforms::UniformValue <'_> {
+                glium::uniforms::UniformValue::$uniform((*self).into())
             }
         }
 
@@ -111,10 +117,22 @@ macro_rules! vec {
 }
 
 vec! {
-    Vec1 : 1 : x 0             : I8       : U8       : I16          : U16          : I32          : U32          : I64          : U64          : F32          : F64,
-    Vec2 : 2 : x 0 y 1         : I8I8     : U8U8     : I16I16       : U16U16       : I32I32       : U32U32       : I64I64       : U64U64       : F32F32       : F64F64,
-    Vec3 : 3 : x 0 y 1 z 2     : I8I8I8   : U8U8U8   : I16I16I16    : U16U16U16    : I32I32I32    : U32U32U32    : I64I64I64    : U64U64U64    : F32F32F32    : F64F64F64,
-    Vec4 : 4 : x 0 y 1 z 2 w 3 : I8I8I8I8 : U8U8U8U8 : I16I16I16I16 : U16U16U16U16 : I32I32I32I32 : U32U32U32U32 : I64I64I64I64 : U64U64U64U64 : F32F32F32F32 : F64F64F64F64,
+    Vec1 : Float : 1 : x 0             : I8       : U8       : I16          : U16          : I32          : U32          : I64          : U64          : F32          : F64,
+    Vec2 : Vec2  : 2 : x 0 y 1         : I8I8     : U8U8     : I16I16       : U16U16       : I32I32       : U32U32       : I64I64       : U64U64       : F32F32       : F64F64,
+    Vec3 : Vec3  : 3 : x 0 y 1 z 2     : I8I8I8   : U8U8U8   : I16I16I16    : U16U16U16    : I32I32I32    : U32U32U32    : I64I64I64    : U64U64U64    : F32F32F32    : F64F64F64,
+    Vec4 : Vec4  : 4 : x 0 y 1 z 2 w 3 : I8I8I8I8 : U8U8U8U8 : I16I16I16I16 : U16U16U16U16 : I32I32I32I32 : U32U32U32U32 : I64I64I64I64 : U64U64U64U64 : F32F32F32F32 : F64F64F64F64,
+}
+
+impl <T> From <T> for Vec1 <T> {
+    fn from(x: T) -> Self {
+        Self { x }
+    }
+}
+
+impl From <Vec1 <f32>> for f32 {
+    fn from(x: Vec1 <f32>) -> Self {
+        x.x
+    }
 }
 
 impl <T> From <PhysicalSize <T>> for Vec2 <T> {

@@ -1,33 +1,39 @@
 use crate::{
-    glium::{Display, Surface},
+    glium::{Display, Surface, Frame},
     Color,
     Vec4,
     Drawable
 };
 
-pub struct DrawTarget(glium::Frame);
+pub struct DrawTarget {
+    target: Frame,
+    dpy: &'static Display
+}
 
-impl core::convert::From <&mut Display> for DrawTarget {
-    fn from(dpy: &mut Display) -> Self {
-        Self { 0: dpy.draw() }
+impl core::convert::From <&'static mut Display> for DrawTarget {
+    fn from(dpy: &'static mut Display) -> Self {
+        Self {
+            target: dpy.draw(),
+            dpy
+        }
     }
 }
 
 impl DrawTarget {
     pub fn clear(mut self, color: Color) -> Self {
         let color = Vec4::<f32>::from(color);
-        self.0.clear_color(color.x, color.y, color.z, color.w);
+        self.target.clear_color(color.x, color.y, color.z, color.w);
         self
     }
 
     #[inline]
     pub fn draw <D> (mut self, drawable: &D) -> Self where D: Drawable {
-        drawable.draw(&mut self.0);
+        drawable.draw(self.dpy, &mut self.target);
         self
     }
 
     #[inline]
     pub fn finish(self) {
-        self.0.finish().unwrap()
+        self.target.finish().unwrap()
     }
 }
