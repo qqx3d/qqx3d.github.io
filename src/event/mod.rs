@@ -1,44 +1,47 @@
-use crate::Window;
-use winit::{
-    platform::run_return::EventLoopExtRunReturn,
-    event::{Event as WEvent, WindowEvent},
-    event_loop::ControlFlow
-};
+pub mod callback;
 
-#[derive(Copy, Clone)]
-#[repr(u8)]
-pub enum Event {
-    Nothing,
-    RedrawRequest(Window),
-    CloseRequested(Window)
+use callback::callbacks;
+use crate::Window;
+use glium::glutin::event::{Event, WindowEvent};
+
+pub use glium::glutin::event_loop::ControlFlow;
+
+type EventLoop = glium::glutin::event_loop::EventLoop <()>;
+
+static mut EVENTLOOP: Option <EventLoop> = None;
+
+#[ctor::ctor]
+#[inline(always)]
+fn init() {
+    unsafe { EVENTLOOP = Some(EventLoop::new()); }
 }
 
-pub fn eventloop <F> (mut handler: F) -> ! where F: FnMut(Event) {
-    loop {
-        crate::init::Stt::eventloop().run_return(|ev, _, control_flow| {
-            *control_flow = ControlFlow::Poll;
-            match ev {
-                WEvent::RedrawRequested(window) => {
-                    let window = Window::by_wid(window);
-                    window.update_on_frame();
-                    handler(Event::RedrawRequest(window))
-                },
-                WEvent::WindowEvent {
-                    window_id,
-                    event
-                } => {
-                    let window = Window::by_wid(window_id);
-                    window.update_on_frame();
+impl crate::Stt {
+    pub fn eventloop() -> &'static mut EventLoop {
+        unsafe { EVENTLOOP.as_mut().unwrap() }
+    }
+}
+
+pub fn eventloop() -> ! {
+    unsafe {
+        EVENTLOOP.take().unwrap().run(|event, _, control_flow| {
+            match event {
+                Event::WindowEvent { event, window_id } => {
+                    let window = Window::by_id(window_id);
+
                     match event {
                         WindowEvent::CloseRequested => {
-                            handler(Event::CloseRequested(window));
-                            std::process::exit(0)
+                            if let Some(cb) = &mut callbacks().on_close { cb(window) }
+                            *control_flow = ControlFlow::Exit;
+                            return
                         },
-                        _ => handler(Event::Nothing)
+                        _ => { }
                     }
                 },
-                _ => handler(Event::Nothing)
+                _ => { }
             }
-        });
+
+            if let Some(cb) = &mut callbacks().on_frame { *control_flow = cb() }
+        })
     }
 }

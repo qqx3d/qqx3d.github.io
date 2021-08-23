@@ -1,6 +1,6 @@
 use core::convert::From;
-use vulkano::format::ClearValue;
 use crate::{Vec3, Vec4};
+use glium::vertex::{Attribute, AttributeType};
 
 ///
 /// Represents RGBA Color
@@ -16,6 +16,12 @@ pub struct Color {
 impl Default for Color {
     #[inline(always)]
     fn default() -> Self { Self::BLACK }
+}
+
+unsafe impl Attribute for Color {
+    fn get_type() -> AttributeType {
+        AttributeType::U8U8U8U8
+    }
 }
 
 impl From <Vec3 <u8>> for Color {
@@ -76,12 +82,6 @@ impl From <Vec3 <f32>> for Color {
 impl From <Color> for Vec3 <f32> {
     fn from(x: Color) -> Self {
         Self::new(Color::vc(x.r), Color::vc(x.g), Color::vc(x.b))
-    }
-}
-
-impl From <Color> for Vec <ClearValue> {
-    fn from(x: Color) -> Self {
-        vec![<[f32; 4]>::from(Vec4::from(x)).into()]
     }
 }
 

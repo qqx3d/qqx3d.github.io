@@ -1,8 +1,11 @@
-use winit::dpi::PhysicalSize;
+use glium::{
+    glutin::dpi::PhysicalSize,
+    vertex::{Attribute, AttributeType}
+};
 use core::convert::From;
 
 macro_rules! vec {
-    ($($ty:ident : $size:literal : $($elem:ident $count:literal)*,)*) => {$(
+    ($($ty:ident : $size:literal : $($elem:ident $count:literal)* : $i8:ident : $u8:ident : $i16:ident : $u16:ident : $i32:ident : $u32:ident : $i64:ident : $u64:ident : $f32:ident : $f64:ident,)*) => {$(
         #[derive(Debug)]
         pub struct $ty <T> {
             $(pub $elem : T,)*
@@ -48,18 +51,22 @@ macro_rules! vec {
             }
         }
 
-        unsafe impl <T> vulkano::pipeline::vertex::VertexMember for $ty <T> where T: vulkano::pipeline::vertex::VertexMember {
-            fn format() -> (vulkano::pipeline::vertex::VertexMemberTy, usize) {
-                let (ty, sz) = <T as vulkano::pipeline::vertex::VertexMember>::format();
-                (ty, sz * $size)
-            }
-        }
-
         impl <T> $ty <T> {
             pub fn new($($elem: T,)*) -> Self {
                 Self { $($elem,)* }
             }
         }
+
+        vec!{ @at $ty i8 $i8 }
+        vec!{ @at $ty u8 $u8 }
+        vec!{ @at $ty i16 $i16 }
+        vec!{ @at $ty u16 $u16 }
+        vec!{ @at $ty i32 $i32 }
+        vec!{ @at $ty u32 $u32 }
+        vec!{ @at $ty i64 $i64 }
+        vec!{ @at $ty u64 $u64 }
+        vec!{ @at $ty f32 $f32 }
+        vec!{ @at $ty f64 $f64 }
 
     )*};
 
@@ -92,13 +99,22 @@ macro_rules! vec {
             }
         }
     };
+
+    (@at $name:ident $ty:ident $id:ident) => {
+        unsafe impl Attribute for $name <$ty> {
+            #[inline]
+            fn get_type() -> AttributeType {
+                AttributeType::$id
+            }
+        }
+    };
 }
 
 vec! {
-    Vec1 : 1 : x 0,
-    Vec2 : 2 : x 0 y 1,
-    Vec3 : 3 : x 0 y 1 z 2,
-    Vec4 : 4 : x 0 y 1 z 2 w 3,
+    Vec1 : 1 : x 0             : I8       : U8       : I16          : U16          : I32          : U32          : I64          : U64          : F32          : F64,
+    Vec2 : 2 : x 0 y 1         : I8I8     : U8U8     : I16I16       : U16U16       : I32I32       : U32U32       : I64I64       : U64U64       : F32F32       : F64F64,
+    Vec3 : 3 : x 0 y 1 z 2     : I8I8I8   : U8U8U8   : I16I16I16    : U16U16U16    : I32I32I32    : U32U32U32    : I64I64I64    : U64U64U64    : F32F32F32    : F64F64F64,
+    Vec4 : 4 : x 0 y 1 z 2 w 3 : I8I8I8I8 : U8U8U8U8 : I16I16I16I16 : U16U16U16U16 : I32I32I32I32 : U32U32U32U32 : I64I64I64I64 : U64U64U64U64 : F32F32F32F32 : F64F64F64F64,
 }
 
 impl <T> From <PhysicalSize <T>> for Vec2 <T> {

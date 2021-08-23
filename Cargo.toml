@@ -1,21 +1,19 @@
 [package]
 name = "qqx"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Roman <qqx.3d.rs@gmail.com>"]
 edition = "2018"
 license = "GPL-3.0"
-description = "qqx is a 3d library for rust based on vulkan without any game engines"
+description = "qqx is a 3d library for rust based on OpenGL"
 repository = "https://github.com/qqx3d/qqx3d.github.io"
 readme = "README.md"
 homepage = "https://qqx3d.github.io"
 documentation = "https://docs.rs/qqx"
 keywords = ["graphic", "graphics", "game"]
 categories = ["game-development", "games", "gui", "graphics"]
-exclude = ["src/main.rs", "index.html", ".gitignore"]
+exclude = ["src/main.rs", "index.html", ".gitignore", "examples"]
 
 [dependencies]
-vulkano = "0.20"
-vulkano-shaders = "0.20"
-vulkano-win = "0.20"
-winit = "0.24"
-once_cell = "1.8.0"
+glium = "0.30.1"
+ctor = "0.1.20"
+qqx-macro = { path = "../qqx-macro" }
